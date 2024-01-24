@@ -9,6 +9,7 @@
 //   });
 ///
 let productCart = [];
+let compareArr = [];
 let activeId = "";
 let index = 1;
 getCategories();
@@ -31,6 +32,8 @@ async function getCategories() {
         getAllProduct();
       } else if (activeId === "cart") {
         renderCart(productCart);
+      } else if (activeId === "compare") {
+        compareGoods(compareArr);
       } else {
         getProductsByCategory(activeId);
       }
@@ -54,11 +57,15 @@ async function getUllCategories() {
   btn.dataset.catName = "All";
   activeId = "All";
   div.append(btn);
-  let btnCart = document.createElement("div");
+  let btnCart = document.createElement("button");
   btnCart.textContent = "🛒 CART";
   btnCart.className = "category-btn Btncart";
   btnCart.dataset.catName = "cart";
   btnCart.dataset.productsLength = "0";
+  let btnToCompare = document.createElement("button");
+  btnToCompare.textContent = "COMPARE";
+  btnToCompare.className = "category-btn btnToCompare";
+  btnToCompare.dataset.catName = "compare";
   for (let i = 0; i < categories.length; i++) {
     let category = categories[i];
     let button = document.createElement("button");
@@ -68,6 +75,7 @@ async function getUllCategories() {
     div.append(button);
   }
   div.append(btnCart);
+  div.append(btnToCompare);
   document.querySelector(".container").prepend(div);
 }
 async function getAllProduct() {
@@ -81,7 +89,7 @@ async function getAllProduct() {
     .then((inform) => {
       return inform;
     });
-  renderGoods(products, productCart);
+  renderGoods(products, productCart, compareArr);
 }
 function itemsColorVisible(product, array) {
   let ownProperty = false;
@@ -92,22 +100,40 @@ function itemsColorVisible(product, array) {
   }
   return ownProperty;
 }
-function renderGoods(array, cartArray) {
+function itemsCompareVisible(product, array) {
+  let ownProperty = false;
+  for (let j = 0; j < array.length; j++) {
+    if (product.id === array[j].id) {
+      ownProperty = true;
+    }
+  }
+  return ownProperty;
+}
+function renderGoods(array, cartArray, compareArr) {
   let prod = document.createElement("div");
   prod.className = "products";
   for (let i = 0; i < array.length; i++) {
     let product = array[i];
-    console.log(product.category);
-    console.log(cartArray);
+
+    let btnCompare = document.createElement("button");
+    btnCompare.dataset.compareBtn = product.id;
+    btnCompare.className = "compare-button";
+
     let span = document.createElement("span");
     let res = false;
+    let compare = false;
     if (cartArray && cartArray.length > 0) {
       res = itemsColorVisible(product, cartArray);
     }
-
+    if (compareArr && compareArr.length > 0) {
+      compare = itemsCompareVisible(product, compareArr);
+    }
+    ////
+    /////
     let div = document.createElement("div");
     div.className = "item";
     div.dataset.itemGoodsId = product.id;
+
     div.innerHTML = `
     <img class='product-image' src='${product.image}'/>
     <h2 class='product-title'>${product.title}</h2>
@@ -122,7 +148,18 @@ function renderGoods(array, cartArray) {
       span.className = "Add-toCart";
       span.addEventListener("click", addToCart(product, span));
     }
+    if (compare) {
+      btnCompare.textContent = "Added";
+      btnCompare.style.pointerEvents = "none";
+    } else {
+      btnCompare.textContent = "Add To Compare";
+      btnCompare.addEventListener(
+        "click",
+        compareProducts(product, product.id)
+      );
+    }
     div.append(span);
+    div.append(btnCompare);
     prod.append(div);
     document.querySelector(".container").append(prod);
   }
@@ -140,7 +177,7 @@ async function getProductsByCategory(category) {
   if (document.querySelector(".products")) {
     document.querySelector(".products").remove();
   }
-  renderGoods(products, productCart);
+  renderGoods(products, productCart, compareArr);
 }
 function addToCart(product, elem) {
   return () => {
@@ -379,4 +416,91 @@ function sumTotal() {
     result += parseFloat(el.textContent);
   });
   document.querySelector(".total-price").textContent = `Total: ${result} USD`;
+}
+function compareProducts(product, id) {
+  return () => {
+    let item = document.querySelector(`[data-compare-btn ='${id}']`);
+    item.textContent = "Added";
+    item.style.pointerEvents = "none";
+    compareArr.push(product);
+  };
+}
+function compareGoods(array) {
+  if (array.length === 0) {
+    return;
+  }
+  let nonVisibleDiv = document.createElement("div");
+  nonVisibleDiv.className = "nonVisibleDiv";
+
+  let div = document.createElement("div");
+  div.className = "modal-cart";
+  let span = document.createElement("span");
+  span.className = "modal-cart-close";
+  span.textContent = "X";
+  span.addEventListener("click", () => {
+    document.querySelector(".nonVisibleDiv").remove();
+    compareArr = [];
+    document.querySelectorAll(`[data-compare-btn]`).forEach((el) => {
+      el.textContent = "Add To Compare";
+      el.style.pointerEvents = "auto";
+    });
+  });
+  div.append(span);
+
+  let table = document.createElement("table");
+  table.className = "tableCompare";
+  for (let i = 0; i < array.length; i++) {
+    let item = array[i];
+    let { price, rate } = chooseBest(array);
+    let p1 = document.createElement("p");
+    p1.className = "border-table";
+    p1.innerHTML = `Rate: ${item.rating.rate}`;
+    if (item.rating.rate === rate) {
+      p1.classList.add("specialChar");
+    }
+    let p2 = document.createElement("p");
+    p2.className = "border-table";
+    p2.innerHTML = `Price: ${item.price} USD`;
+    if (item.price === price) {
+      p2.classList.add("specialChar");
+    }
+
+    let td = document.createElement("td");
+    td.className = "table-td-compare";
+    td.innerHTML = `
+    <img class='compare-table' src='${item.image}'/>
+    <p class='border-table'>Title: ${item.title}</p>
+    `;
+    td.append(p1);
+    td.append(p2);
+    table.append(td);
+  }
+  div.append(table);
+  nonVisibleDiv.append(div);
+  document.querySelector(".container").prepend(nonVisibleDiv);
+  //
+
+  document
+    .querySelector(`[data-cat-name="${activeId}"]`)
+    .classList.remove("activebBtn");
+  activeId = "All";
+  console.log(document.querySelector(`[data-cat-name="${activeId}"]`));
+  document
+    .querySelector(`[data-cat-name='${activeId}']`)
+    .classList.add("activebBtn");
+  getAllProduct();
+}
+function chooseBest(array) {
+  let price = 1000000;
+  let rate = 0;
+  for (let i = 0; i < array.length; i++) {
+    let item = array[i];
+    if (item.rating.rate > rate) {
+      rate = item.rating.rate;
+    }
+    if (item.price < price) {
+      price = item.price;
+    }
+  }
+  return { price, rate };
 }
