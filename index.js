@@ -226,12 +226,19 @@ function clickToCartHandler(product,elem)
     },500)
   
     let createProduct = {...product,count:index}
-   
+    productCart.push(createProduct)
+    console.log(productCart)
+    checkCountData(productCart)
+    index = 1
   }
 }
 
 function renderCart(array) {
-
+console.log(array)
+  // if(array.length === 0)
+  // {
+  //   return
+  // }
   let nonVisibleDiv = document.createElement('div')
   nonVisibleDiv.className = 'nonVisibleDiv'
 
@@ -276,4 +283,14 @@ function renderCart(array) {
   div.append(p)
   nonVisibleDiv.append(div)
   document.querySelector('.container').prepend(nonVisibleDiv)
+}
+
+function checkCountData(array)
+{
+  let count = 0
+  for(let i =0; i< array.length;i++)
+  {
+    count += array[i].count
+  }
+  document.querySelector(`[data-products-length]`).dataset.productsLength = count
 }
