@@ -278,6 +278,8 @@ function clickToCartHandler(product, elem) {
 function renderCart(array) {
   console.log(array);
   if (array.length === 0) {
+    let params = document.querySelector(`[data-cat-name="cart"]`).getBoundingClientRect()
+    addictionVisible(params.left)
     return;
   }
   let nonVisibleDiv = document.createElement("div");
@@ -387,7 +389,7 @@ function changeCountByArray(id, array, indent) {
       // elem.closest(".item").style.backgroundColor = "pink";
       // elem.style.pointerEvents = "none";
     }
-    console.log(array);
+    // console.log(array);
   };
 }
 function checkCountArray(array) {
@@ -427,6 +429,8 @@ function compareProducts(product, id) {
 }
 function compareGoods(array) {
   if (array.length === 0) {
+    let params = document.querySelector(`[data-cat-name="compare"]`).getBoundingClientRect()
+    addictionVisibleCompare(params.left)
     return;
   }
   let nonVisibleDiv = document.createElement("div");
@@ -484,7 +488,6 @@ function compareGoods(array) {
     .querySelector(`[data-cat-name="${activeId}"]`)
     .classList.remove("activebBtn");
   activeId = "All";
-  console.log(document.querySelector(`[data-cat-name="${activeId}"]`));
   document
     .querySelector(`[data-cat-name='${activeId}']`)
     .classList.add("activebBtn");
@@ -503,4 +506,30 @@ function chooseBest(array) {
     }
   }
   return { price, rate };
+}
+function addictionVisible(left)
+{
+let span = document.createElement('span')
+span.className = 'aditional-elem'
+span.textContent = 'Cart is Empty'
+document.querySelector('.container').append(span)
+span.style.left = `${left}px`
+span.style.animation = 'visibleElem 2s linear;'
+setTimeout(()=>
+{
+document.querySelector('.aditional-elem').remove()
+},3000)
+}
+function addictionVisibleCompare(left)
+{
+let span = document.createElement('span')
+span.className = 'aditional-elem'
+span.textContent = 'CompareList is Empty'
+document.querySelector('.container').append(span)
+span.style.left = `${left}px`
+span.style.animation = 'visibleElem 2s linear;'
+setTimeout(()=>
+{
+document.querySelector('.aditional-elem').remove()
+},3000)
 }

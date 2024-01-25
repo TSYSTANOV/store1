@@ -322,3 +322,23 @@ modal-cart-item-count */
   background-color: green;
   padding: 1px;
 }
+.aditional-elem
+{
+  background-color: red;
+  position: absolute;
+  top:-30px;
+  max-width: 150px;
+  display: block;
+  padding: 15px 20px;
+  font-size: 20px;
+  font-weight: 900;
+  border-radius: 10px;
+  opacity:0;
+  animation:visibleElem 2s linear;
+}
+@keyframes visibleElem {
+  0%{top:-30px; opacity:0}
+  25%{top:50px; opacity:1}
+  75%{top:50px; opacity:1}
+  100%{top:-30px; opacity:0}
+}
